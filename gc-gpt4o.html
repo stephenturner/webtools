@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GC Content Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input {
+            width: 80%;
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        p {
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>GC Content Calculator</h1>
+    <input type="text" id="dnaInput" placeholder="Enter DNA sequence (A, T, C, G only)" oninput="calculateGCContent()">
+    <button onclick="insertExample()">Insert Example</button>
+    <p id="gcResult">GC Content: 0%</p>
+    <p id="errorMessage" style="color: red;"></p>
+
+    <script>
+        function calculateGCContent() {
+            let input = document.getElementById("dnaInput").value.toUpperCase();
+            let validDna = /^[ATCG]*$/;
+            let errorMessage = document.getElementById("errorMessage");
+
+            if (!validDna.test(input)) {
+                errorMessage.textContent = "Invalid input: Only A, T, C, and G are allowed.";
+                document.getElementById("gcResult").textContent = "GC Content: 0%";
+                return;
+            } else {
+                errorMessage.textContent = "";
+            }
+
+            let gcCount = (input.match(/[GC]/g) || []).length;
+            let gcContent = input.length > 0 ? ((gcCount / input.length) * 100).toFixed(2) : 0;
+
+            document.getElementById("gcResult").textContent = `GC Content: ${gcContent}%`;
+        }
+
+        function insertExample() {
+            let exampleSequence = "GATTACA";
+            document.getElementById("dnaInput").value = exampleSequence;
+            calculateGCContent();
+        }
+    </script>
+
+</body>
+</html>

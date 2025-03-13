@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>GC Content Calculator</title>
+  <style>
+    body {
+      font-family: sans-serif;
+    }
+
+    #dnaInput {
+      width: 300px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    #gcResult {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>GC Content Calculator</h1>
+
+  <label for="dnaInput">Enter DNA Sequence:</label><br>
+  <input type="text" id="dnaInput" placeholder="Enter sequence (A, T, C, G)">
+  <button id="exampleButton">Insert Example Sequence</button>
+
+  <p id="gcResult"></p>
+
+
+  <script>
+    const dnaInput = document.getElementById('dnaInput');
+    const gcResult = document.getElementById('gcResult');
+    const exampleButton = document.getElementById('exampleButton');
+
+    // Function to calculate GC content
+    function calculateGCContent() {
+      const sequence = dnaInput.value.toUpperCase(); // Convert to uppercase for case-insensitive comparison
+      let gcCount = 0;
+      let totalLength = sequence.length;
+
+      if (totalLength === 0) {
+        gcResult.textContent = "Please enter a DNA sequence.";
+        return;
+      }
+
+
+      for (let i = 0; i < totalLength; i++) {
+        const base = sequence[i];
+        if (base === 'G' || base === 'C') {
+          gcCount++;
+        }
+      }
+
+      const gcPercentage = (gcCount / totalLength) * 100;
+      gcResult.textContent = `GC Content: ${gcPercentage.toFixed(2)}%`; // Display with two decimal places
+    }
+
+
+    // Event listener for input changes - update GC content dynamically
+    dnaInput.addEventListener('input', calculateGCContent);
+
+    // Event listener for the example button
+    exampleButton.addEventListener('click', function() {
+      dnaInput.value = "GATTACA";
+      calculateGCContent(); // Calculate immediately when the button is clicked
+    });
+
+
+    // Initial validation (optional - can be done on every input, but this provides a basic check)
+    dnaInput.addEventListener("input", function() {
+        const sequence = dnaInput.value;
+        let valid = true;
+
+        for(let i = 0; i < sequence.length; i++) {
+            const char = sequence[i];
+            if(!('A'.includes(char) || 'T'.includes(char) || 'C'.includes(char) || 'G'.includes(char))) {
+                valid = false;
+                break;
+            }
+        }
+
+        if (!valid) {
+          dnaInput.value = dnaInput.value.substring(0, dnaInput.value.length - 1); // Remove the invalid character
+        }
+    });
+
+
+  </script>
+
+</body>
+</html>
