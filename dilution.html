@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Dilution Calculator</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+        }
+
+        label {
+            display: inline-block;
+            width: 120px;
+            margin-right: 5px;
+        }
+
+        .row {
+            margin: 10px 0;
+        }
+
+        select,
+        input[type="number"] {
+            margin-right: 10px;
+        }
+
+        button {
+            margin: 20px 0;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Dilution Calculator</h1>
+    <p>Enter three of the four values to solve the classic equation C1·V1 = C2·V2.</p>
+    <div class="row">
+        <label for="c1">Concentration 1:</label>
+        <input type="number" id="c1" placeholder="e.g. 5">
+        <select id="c1Unit">
+            <option value="M">molar (M)</option>
+            <option value="mM" selected>millimolar (mM)</option>
+            <option value="uM">micromolar (µM)</option>
+            <option value="nM">nanomolar (nM)</option>
+            <option value="pM">picomolar (pM)</option>
+        </select>
+    </div>
+    <div class="row">
+        <label for="v1">Volume 1:</label>
+        <input type="number" id="v1" placeholder="e.g. 2">
+        <select id="v1Unit">
+            <option value="L">liter (L)</option>
+            <option value="mL" selected>milliliter (mL)</option>
+            <option value="uL">microliter (µL)</option>
+            <option value="nL">nanoliter (nL)</option>
+        </select>
+    </div>
+    <div class="row">
+        <label for="c2">Concentration 2:</label>
+        <input type="number" id="c2" placeholder="e.g. 1">
+        <select id="c2Unit">
+            <option value="M">molar (M)</option>
+            <option value="mM" selected>millimolar (mM)</option>
+            <option value="uM">micromolar (µM)</option>
+            <option value="nM">nanomolar (nM)</option>
+            <option value="pM">picomolar (pM)</option>
+        </select>
+    </div>
+    <div class="row">
+        <label for="v2">Volume 2:</label>
+        <input type="number" id="v2" placeholder="e.g. 10">
+        <select id="v2Unit">
+            <option value="L">liter (L)</option>
+            <option value="mL" selected>milliliter (mL)</option>
+            <option value="uL">microliter (µL)</option>
+            <option value="nL">nanoliter (nL)</option>
+        </select>
+    </div>
+
+    <button type="button" onclick="calculateDilution()">Calculate</button>
+    <p id="result"></p>
+
+    <script>
+        function getConcentrationFactor(unit) {
+            switch (unit) {
+                case 'M': return 1;
+                case 'mM': return 1e-3;
+                case 'uM': return 1e-6;
+                case 'nM': return 1e-9;
+                case 'pM': return 1e-12;
+                default: return 1;
+            }
+        }
+
+        function getVolumeFactor(unit) {
+            switch (unit) {
+                case 'L': return 1;
+                case 'mL': return 1e-3;
+                case 'uL': return 1e-6;
+                case 'nL': return 1e-9;
+                default: return 1;
+            }
+        }
+
+        function calculateDilution() {
+            const c1Val = parseFloat(document.getElementById('c1').value);
+            const c1Unit = document.getElementById('c1Unit').value;
+            const v1Val = parseFloat(document.getElementById('v1').value);
+            const v1Unit = document.getElementById('v1Unit').value;
+            const c2Val = parseFloat(document.getElementById('c2').value);
+            const c2Unit = document.getElementById('c2Unit').value;
+            const v2Val = parseFloat(document.getElementById('v2').value);
+            const v2Unit = document.getElementById('v2Unit').value;
+
+            // Convert all entered values to base units (M and L):
+            const c1Base = !isNaN(c1Val) ? c1Val * getConcentrationFactor(c1Unit) : NaN;
+            const v1Base = !isNaN(v1Val) ? v1Val * getVolumeFactor(v1Unit) : NaN;
+            const c2Base = !isNaN(c2Val) ? c2Val * getConcentrationFactor(c2Unit) : NaN;
+            const v2Base = !isNaN(v2Val) ? v2Val * getVolumeFactor(v2Unit) : NaN;
+
+            const filledCount = [c1Base, v1Base, c2Base, v2Base].filter(x => !isNaN(x)).length;
+            if (filledCount < 3) {
+                document.getElementById('result').textContent =
+                    'Please fill in at least three fields to solve for the fourth.';
+                return;
+            }
+
+            let resultText = '';
+            // If c1 missing => c1 = (c2·v2)/v1
+            if (isNaN(c1Val)) {
+                const c1ComputedBase = (c2Base * v2Base) / v1Base; // in M
+                const c1Computed = c1ComputedBase / getConcentrationFactor(c1Unit);
+                resultText = `Calculated C1 = ${c1Computed.toPrecision(4)} ${c1Unit}`;
+            }
+            // If v1 missing => v1 = (c2·v2)/c1
+            else if (isNaN(v1Val)) {
+                const v1ComputedBase = (c2Base * v2Base) / c1Base; // in L
+                const v1Computed = v1ComputedBase / getVolumeFactor(v1Unit);
+                resultText = `Calculated V1 = ${v1Computed.toPrecision(4)} ${v1Unit}`;
+            }
+            // If c2 missing => c2 = (c1·v1)/v2
+            else if (isNaN(c2Val)) {
+                const c2ComputedBase = (c1Base * v1Base) / v2Base; // in M
+                const c2Computed = c2ComputedBase / getConcentrationFactor(c2Unit);
+                resultText = `Calculated C2 = ${c2Computed.toPrecision(4)} ${c2Unit}`;
+            }
+            // If v2 missing => v2 = (c1·v1)/c2
+            else if (isNaN(v2Val)) {
+                const v2ComputedBase = (c1Base * v1Base) / c2Base; // in L
+                const v2Computed = v2ComputedBase / getVolumeFactor(v2Unit);
+                resultText = `Calculated V2 = ${v2Computed.toPrecision(4)} ${v2Unit}`;
+            }
+            // If all four are given, just check consistency
+            else {
+                const leftSide = c1Base * v1Base;
+                const rightSide = c2Base * v2Base;
+                const diff = Math.abs(leftSide - rightSide);
+                if (diff < 1e-12) {
+                    resultText = 'All four values are consistent (C1×V1 ≈ C2×V2).';
+                } else {
+                    resultText = `Values are NOT consistent. C1×V1 = ${leftSide}, C2×V2 = ${rightSide}.`;
+                }
+            }
+
+            document.getElementById('result').textContent = resultText;
+        }
+    </script>
+</body>
+
+</html>
